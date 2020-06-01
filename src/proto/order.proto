@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "ZeebePOC.Order.Service";
+
+package Order;
+
+message OrderRequest {
+  string order_id = 1;
+  int32 total_items = 2;
+  double amount = 3;
+}
+
+message OrderResponse {
+  int32 status_id = 1;
+}
+
+service OrderService {
+  rpc RegisterOrder (OrderRequest) returns (OrderResponse);
+}

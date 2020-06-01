@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ZeebePOC.Payment.Service";
+
+package Payment;
+
+message PaymentRequest {
+  string order_id = 1;
+}
+
+message PaymentResponse {
+  string payment_id = 1;
+}
+
+service PaymentService {
+  rpc ProcessPayment (PaymentRequest) returns (PaymentResponse);
+}

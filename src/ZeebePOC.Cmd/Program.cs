@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Zeebe.Client;
+using Newtonsoft.Json;
+using Zeebe.Common;
+using ZeebePOC.Order.Service;
 
 namespace ZeebePOC.Cmd
 {
@@ -18,6 +19,11 @@ namespace ZeebePOC.Cmd
     /// </summary>
     private static readonly string _zeebeUrl = "127.0.0.1:26500";
 
+    /// <summary>
+    /// 
+    /// </summary>
+    private static ZeebeContext _zeebeContext;
+
     #endregion
 
     #region :: Methods ::
@@ -31,20 +37,25 @@ namespace ZeebePOC.Cmd
     {
       try
       {
+        _zeebeContext = new ZeebeContext(_zeebeUrl);
 
-        var client = ZeebeClient.Builder()
-          .UseGatewayAddress(_zeebeUrl)
-          .UsePlainText()
-          .Build();
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process.bpmn");
 
-        await GetTopology(client);
+        await _zeebeContext.GetTopology();
 
-        await DeployOrderProcess(client);
+        await _zeebeContext.DeployProcess(path);
+
+        await CreateInstance("order-process", new OrderRequest
+        {
+          OrderId = Guid.NewGuid().ToString(),
+          Amount = 23,
+          TotalItems = 2
+        });
 
       }
       catch (Exception ex)
       {
-        WriteMessage(ex.Message, ConsoleColor.Red);
+        Utils.WriteMessage(ex.Message, ConsoleColor.Red);
       }
     }
 
@@ -55,42 +66,20 @@ namespace ZeebePOC.Cmd
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="client"></param>
+    /// <param name="processId"></param>
+    /// <param name="orderRequest"></param>
     /// <returns></returns>
-    private static async Task GetTopology(IZeebeClient client)
+    private static async Task CreateInstance(string processId, OrderRequest orderRequest)
     {
-      var topology = await client.TopologyRequest()
+      var workflowInstance = await _zeebeContext.Client
+        .NewCreateWorkflowInstanceCommand()
+        .BpmnProcessId(processId)
+        .LatestVersion()
+        .Variables(JsonConvert.SerializeObject(orderRequest))
         .Send();
 
-      WriteMessage(topology.ToString(), ConsoleColor.Green);
-    }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="client"></param>
-    /// <returns></returns>
-    private static async Task DeployOrderProcess(IZeebeClient client)
-    {
-      var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process.bpmn");
-
-      var response = await client.NewDeployCommand()
-        .AddResourceFile(path)
-        .Send();
-
-      WriteMessage($"Workflow added version-{response.Workflows.FirstOrDefault().Version}", ConsoleColor.Yellow);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="message"></param>
-    /// <param name="color"></param>
-    private static void WriteMessage(string message, ConsoleColor color = ConsoleColor.White)
-    {
-      Console.ForegroundColor = color;
-      Console.WriteLine(message);
-      Console.ResetColor();
+      Utils.WriteMessage(workflowInstance.WorkflowInstanceKey.ToString(), ConsoleColor.Green);
     }
 
     #endregion

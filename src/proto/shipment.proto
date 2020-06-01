@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ZeebePOC.Shipment.Service";
+
+package Shipment;
+
+message ShipmentRequest {
+  string payment_id = 1;
+}
+
+message ShipmentResponse {
+  string shipment_id = 1;
+}
+
+service ShipmentService {
+  rpc ProcessShipment (ShipmentRequest) returns (ShipmentResponse);
+}

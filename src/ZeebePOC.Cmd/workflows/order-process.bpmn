@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1mhlo5c" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.9.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1mhlo5c" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.7.0">
   <bpmn:process id="order-process" name="Order Process" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Order placed">
-      <bpmn:outgoing>Flow_1kr4y5z</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_08xkokm</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_1vev9an" name="Order delivered">
-      <bpmn:incoming>Flow_1kr4y5z</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_076um0c</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_1kr4y5z" sourceRef="StartEvent_1" targetRef="Event_1vev9an" />
+    <bpmn:serviceTask id="payment-service-task" name="Collect Money">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="payment-service" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_08xkokm</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_00vmsg7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_08xkokm" sourceRef="StartEvent_1" targetRef="payment-service-task" />
+    <bpmn:sequenceFlow id="SequenceFlow_00vmsg7" sourceRef="payment-service-task" targetRef="shipping-service-task" />
+    <bpmn:serviceTask id="shipping-service-task" name="Ship Product">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="shipping-service" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_00vmsg7</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_076um0c</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_076um0c" sourceRef="shipping-service-task" targetRef="Event_1vev9an" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-process">
-      <bpmndi:BPMNEdge id="Flow_1kr4y5z_di" bpmnElement="Flow_1kr4y5z">
-        <di:waypoint x="215" y="97" />
-        <di:waypoint x="382" y="97" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="179" y="79" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -22,11 +34,29 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1vev9an_di" bpmnElement="Event_1vev9an">
-        <dc:Bounds x="382" y="79" width="36" height="36" />
+        <dc:Bounds x="662" y="79" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="362" y="122" width="76" height="14" />
+          <dc:Bounds x="642" y="122" width="76" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0yjwfjr_di" bpmnElement="payment-service-task">
+        <dc:Bounds x="270" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_08xkokm_di" bpmnElement="SequenceFlow_08xkokm">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="270" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_00vmsg7_di" bpmnElement="SequenceFlow_00vmsg7">
+        <di:waypoint x="370" y="97" />
+        <di:waypoint x="470" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1q97m4n_di" bpmnElement="shipping-service-task">
+        <dc:Bounds x="470" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_076um0c_di" bpmnElement="SequenceFlow_076um0c">
+        <di:waypoint x="570" y="97" />
+        <di:waypoint x="662" y="97" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
