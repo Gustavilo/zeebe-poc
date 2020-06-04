@@ -7,6 +7,7 @@
   <ItemGroup>
     <Protobuf Include="..\proto\order.proto" GrpcServices="None" />
     <Protobuf Include="..\proto\payment.proto" GrpcServices="Client" />
+    <Protobuf Include="..\proto\shipment.proto" GrpcServices="Client" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zeebe.Common\Zeebe.Common.csproj" />

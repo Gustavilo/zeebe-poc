@@ -15,15 +15,15 @@
       <bpmn:outgoing>SequenceFlow_00vmsg7</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_08xkokm" sourceRef="StartEvent_1" targetRef="payment-service-task" />
-    <bpmn:sequenceFlow id="SequenceFlow_00vmsg7" sourceRef="payment-service-task" targetRef="shipping-service-task" />
-    <bpmn:serviceTask id="shipping-service-task" name="Ship Product">
+    <bpmn:sequenceFlow id="SequenceFlow_00vmsg7" sourceRef="payment-service-task" targetRef="shipment-service-task" />
+    <bpmn:serviceTask id="shipment-service-task" name="Ship Product">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="shipping-service" retries="3" />
+        <zeebe:taskDefinition type="shipment-service" retries="3" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_00vmsg7</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_076um0c</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_076um0c" sourceRef="shipping-service-task" targetRef="Event_1vev9an" />
+    <bpmn:sequenceFlow id="SequenceFlow_076um0c" sourceRef="shipment-service-task" targetRef="Event_1vev9an" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-process">
@@ -34,28 +34,28 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1vev9an_di" bpmnElement="Event_1vev9an">
-        <dc:Bounds x="662" y="79" width="36" height="36" />
+        <dc:Bounds x="592" y="79" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="642" y="122" width="76" height="14" />
+          <dc:Bounds x="572" y="122" width="76" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0yjwfjr_di" bpmnElement="payment-service-task">
-        <dc:Bounds x="270" y="57" width="100" height="80" />
+        <dc:Bounds x="280" y="57" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_08xkokm_di" bpmnElement="SequenceFlow_08xkokm">
         <di:waypoint x="215" y="97" />
-        <di:waypoint x="270" y="97" />
+        <di:waypoint x="280" y="97" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_00vmsg7_di" bpmnElement="SequenceFlow_00vmsg7">
-        <di:waypoint x="370" y="97" />
-        <di:waypoint x="470" y="97" />
+        <di:waypoint x="380" y="97" />
+        <di:waypoint x="440" y="97" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_1q97m4n_di" bpmnElement="shipping-service-task">
-        <dc:Bounds x="470" y="57" width="100" height="80" />
+      <bpmndi:BPMNShape id="ServiceTask_1q97m4n_di" bpmnElement="shipment-service-task">
+        <dc:Bounds x="440" y="57" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_076um0c_di" bpmnElement="SequenceFlow_076um0c">
-        <di:waypoint x="570" y="97" />
-        <di:waypoint x="662" y="97" />
+        <di:waypoint x="540" y="97" />
+        <di:waypoint x="592" y="97" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

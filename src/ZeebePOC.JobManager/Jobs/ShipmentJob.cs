@@ -5,16 +5,12 @@ using Newtonsoft.Json;
 using Zeebe.Client;
 using Zeebe.Client.Api.Worker;
 using Zeebe.Common;
-using ZeebePOC.Order.Service;
-using ZeebePOC.Payment.Service;
-using static ZeebePOC.Payment.Service.PaymentService;
+using ZeebePOC.Shipment.Service;
+using static ZeebePOC.Shipment.Service.ShipmentService;
 
 namespace ZeebePOC.JobManager.Jobs
 {
-  /// <summary>
-  /// 
-  /// </summary>
-  public class PaymentJob
+  public class ShipmentJob
   {
     #region :: Private Fields ::
 
@@ -36,7 +32,7 @@ namespace ZeebePOC.JobManager.Jobs
     /// 
     /// </summary>
     /// <param name="zeebeContext"></param>
-    public PaymentJob(IZeebeClient zeebeClient) => _zeebeClient = zeebeClient;
+    public ShipmentJob(IZeebeClient zeebeClient) => _zeebeClient = zeebeClient;
 
     #endregion
 
@@ -49,22 +45,22 @@ namespace ZeebePOC.JobManager.Jobs
     /// <param name="workerName"></param>
     public void StartWorker(string jobType, string workerName)
     {
-      Utils.WriteMessage("Payment Job starting...", ConsoleColor.Magenta);
+      Utils.WriteMessage("Shipment Job starting...", ConsoleColor.Yellow);
 
       _jobWorker = _zeebeClient.NewWorker()
         .JobType(jobType)
         .Handler((jobClient, job) =>
         {
-          var orderRequest = JsonConvert.DeserializeObject<OrderRequest>(job.Variables);
+          var shipmentRequest = JsonConvert.DeserializeObject<ShipmentRequest>(job.Variables);
 
           var jobKey = job.Key;
-          Utils.WriteMessage($"---> Collect the money!!! (JobKey {jobKey})", ConsoleColor.Green);
+          Utils.WriteMessage($"---> Shipping order!!! (JobKey {jobKey})", ConsoleColor.Cyan);
 
-          Utils.WriteMessage($"***> Sendig OrderId {orderRequest.OrderId} to payment service...", ConsoleColor.Green);
+          Utils.WriteMessage($"***> Sendig PaymentId {shipmentRequest.PaymentId} to shipping service...", ConsoleColor.Cyan);
 
-          var response = SendToProcess(new PaymentRequest { OrderId = orderRequest.OrderId }).Result;
+          var response = SendToProcess(shipmentRequest).Result;
 
-          Utils.WriteMessage($":::> PaymentId {response.PaymentId} created.", ConsoleColor.Green);
+          Utils.WriteMessage($":::> ShipmentId {response.ShipmentId} created.", ConsoleColor.Cyan);
 
           jobClient.NewCompleteJobCommand(jobKey)
             .Variables(JsonConvert.SerializeObject(response))
@@ -80,7 +76,7 @@ namespace ZeebePOC.JobManager.Jobs
         .Timeout(TimeSpan.FromSeconds(10))
         .Open();
 
-      Utils.WriteMessage("-> Payment Job started.", ConsoleColor.Magenta);
+      Utils.WriteMessage("-> Shipment Job started.", ConsoleColor.Yellow);
     }
 
     /// <summary>
@@ -92,7 +88,7 @@ namespace ZeebePOC.JobManager.Jobs
       {
         _jobWorker.Dispose();
 
-        Utils.WriteMessage("-> Payment Job disposed.", ConsoleColor.Magenta);
+        Utils.WriteMessage("-> Shipment Job disposed.", ConsoleColor.Yellow);
       }
     }
 
@@ -105,15 +101,15 @@ namespace ZeebePOC.JobManager.Jobs
     /// </summary>
     /// <param name="paymentRequest"></param>
     /// <returns></returns>
-    private async Task<PaymentResponse> SendToProcess(PaymentRequest paymentRequest)
+    private async Task<ShipmentResponse> SendToProcess(ShipmentRequest shipmentRequest)
     {
       AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-      using var channel = GrpcChannel.ForAddress("http://localhost:6060");
+      using var channel = GrpcChannel.ForAddress("http://localhost:7070");
 
-      var client = new PaymentServiceClient(channel);
+      var client = new ShipmentServiceClient(channel);
 
-      return await client.ProcessPaymentAsync(paymentRequest);
+      return await client.ProcessShipmentAsync(shipmentRequest);
     }
 
     #endregion

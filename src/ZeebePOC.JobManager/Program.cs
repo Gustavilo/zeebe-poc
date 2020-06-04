@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Zeebe.Common;
 using ZeebePOC.JobManager.Jobs;
 
@@ -31,12 +32,15 @@ namespace ZeebePOC.JobManager
         var zeebeContext = new ZeebeContext(_zeebeUrl);
 
         var paymentJob = new PaymentJob(zeebeContext.Client);
+        var shipmentJob = new ShipmentJob(zeebeContext.Client);
 
-        paymentJob.StartWorker("payment-service", Environment.MachineName);
+        Task.Factory.StartNew(() => paymentJob.StartWorker("payment-service", Environment.MachineName));
+        Task.Factory.StartNew(() => shipmentJob.StartWorker("shipment-service", Environment.MachineName));
 
         Console.ReadLine();
 
         paymentJob.StopCurrentWorker();
+        shipmentJob.StopCurrentWorker();
       }
       catch (Exception ex)
       {

@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\proto\payment.proto" GrpcServices="Server" />
+    <Protobuf Include="..\proto\shipment.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,9 +15,10 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
   </ItemGroup>
 
-  <ItemGroup>
+   <ItemGroup>
     <Content Update="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
 </Project>

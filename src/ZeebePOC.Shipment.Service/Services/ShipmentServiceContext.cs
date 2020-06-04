@@ -2,14 +2,14 @@
 using System.Threading.Tasks;
 using Grpc.Core;
 using Serilog;
-using static ZeebePOC.Payment.Service.PaymentService;
+using static ZeebePOC.Shipment.Service.ShipmentService;
 
-namespace ZeebePOC.Payment.Service.Services
+namespace ZeebePOC.Shipment.Service.Services
 {
   /// <summary>
   /// 
   /// </summary>
-  public class PaymentServiceContext : PaymentServiceBase
+  public class ShipmentServiceContext : ShipmentServiceBase
   {
     #region :: Private Fields ::
 
@@ -28,13 +28,13 @@ namespace ZeebePOC.Payment.Service.Services
     /// <param name="request"></param>
     /// <param name="context"></param>
     /// <returns></returns>
-    public override Task<PaymentResponse> ProcessPayment(PaymentRequest request, ServerCallContext context)
+    public override Task<ShipmentResponse> ProcessShipment(ShipmentRequest request, ServerCallContext context)
     {
-      _logger.Information($"Payment with OrderId {request.OrderId} processed.");
+      _logger.Information($"Shipment with PaymentId {request.PaymentId} processed.");
 
-      return Task.FromResult(new PaymentResponse
+      return Task.FromResult(new ShipmentResponse
       {
-        PaymentId = Guid.NewGuid().ToString()
+        ShipmentId = Guid.NewGuid().ToString()
       });
     }
 
