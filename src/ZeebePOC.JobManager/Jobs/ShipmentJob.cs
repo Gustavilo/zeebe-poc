@@ -67,12 +67,11 @@ namespace ZeebePOC.JobManager.Jobs
             .Send()
             .GetAwaiter()
             .GetResult();
-
         })
         .MaxJobsActive(5)
         .Name(workerName)
         .AutoCompletion()
-        .PollInterval(TimeSpan.FromSeconds(1))
+        .PollInterval(TimeSpan.FromMilliseconds(250))
         .Timeout(TimeSpan.FromSeconds(10))
         .Open();
 

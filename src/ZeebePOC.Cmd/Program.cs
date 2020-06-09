@@ -44,42 +44,11 @@ namespace ZeebePOC.Cmd
         await _zeebeContext.GetTopology();
 
         await _zeebeContext.DeployProcess(path);
-
-        await CreateInstance("order-process", new OrderRequest
-        {
-          OrderId = Guid.NewGuid().ToString(),
-          Amount = 23,
-          TotalItems = 2
-        });
-
       }
       catch (Exception ex)
       {
         Utils.WriteMessage(ex.Message, ConsoleColor.Red);
       }
-    }
-
-    #endregion
-
-    #region :: Private Methods ::
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="processId"></param>
-    /// <param name="orderRequest"></param>
-    /// <returns></returns>
-    private static async Task CreateInstance(string processId, OrderRequest orderRequest)
-    {
-      var workflowInstance = await _zeebeContext.Client
-        .NewCreateWorkflowInstanceCommand()
-        .BpmnProcessId(processId)
-        .LatestVersion()
-        .Variables(JsonConvert.SerializeObject(orderRequest))
-        .Send();
-
-
-      Utils.WriteMessage(workflowInstance.WorkflowInstanceKey.ToString(), ConsoleColor.Green);
     }
 
     #endregion

@@ -1,12 +1,11 @@
 using System;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace ZeebePOC.Payment.Service
+namespace ZeebePOC.Service
 {
   /// <summary>
   /// 
@@ -21,7 +20,7 @@ namespace ZeebePOC.Payment.Service
     /// <param name="args"></param>
     public static void Main(string[] args)
     {
-      var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? Environments.Development;
+      var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
       var localConfiguration = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
@@ -32,13 +31,23 @@ namespace ZeebePOC.Payment.Service
 
       Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(localConfiguration)
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Environment", environment)
-        .Enrich.WithProperty("AppId", "gRPC PaymentService")
-        .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss zzz}|{AppId}|{Level}|{TraceIdentifier}|{SourceContext}|{ActionName}{NewLine}{Message}{NewLine}{Exception}")
+        .Enrich.WithProperty("AppId", "ZeebePOC.Service")
         .CreateLogger();
 
-      CreateHostBuilder(args, localConfiguration).Build().Run();
+      try
+      {
+        CreateHostBuilder(args, localConfiguration)
+          .Build()
+          .Run();
+      }
+      catch (Exception ex)
+      {
+        Log.Fatal(ex, "Host terminated unexpectedly");
+      }
+      finally
+      {
+        Log.CloseAndFlush();
+      }
     }
 
     /// <summary>
@@ -51,17 +60,10 @@ namespace ZeebePOC.Payment.Service
       Host.CreateDefaultBuilder(args)
         .ConfigureWebHostDefaults(webBuilder =>
         {
-          webBuilder.ConfigureKestrel(options =>
-          {
-            options.ListenLocalhost(6060, o =>
-            {
-              o.Protocols = HttpProtocols.Http2;
-            });
-          });
-
           webBuilder
-          .UseConfiguration(localConfiguration)
-          .UseStartup<Startup>();
+            .UseConfiguration(localConfiguration)
+            .UseSerilog()
+            .UseStartup<Startup>();
         });
 
     #endregion
