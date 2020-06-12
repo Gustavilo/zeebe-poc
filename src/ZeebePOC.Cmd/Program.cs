@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Zeebe.Common;
-using ZeebePOC.Order.Service;
 
 namespace ZeebePOC.Cmd
 {
@@ -39,15 +37,25 @@ namespace ZeebePOC.Cmd
       {
         _zeebeContext = new ZeebeContext(_zeebeUrl);
 
-        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process.bpmn");
+        var pathOrderProcess = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process.bpmn");
+
+        var pathOrderPaymentLinkProcess = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "payment_link.bpmn");
+
+        //var pathOrderProcessSalesForce = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process-salesforce.bpmn");
+
+        //var pathTimerEmail = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "timer-email.bpmn");
 
         await _zeebeContext.GetTopology();
 
-        await _zeebeContext.DeployProcess(path);
+        await _zeebeContext.DeployProcess(pathOrderProcess);
+        await _zeebeContext.DeployProcess(pathOrderPaymentLinkProcess);
+        //await _zeebeContext.DeployProcess(pathOrderProcessSalesForce);
+        //await _zeebeContext.DeployProcess(pathTimerEmail);
       }
       catch (Exception ex)
       {
         Utils.WriteMessage(ex.Message, ConsoleColor.Red);
+        Utils.WriteMessage(ex.StackTrace, ConsoleColor.Red);
       }
     }
 

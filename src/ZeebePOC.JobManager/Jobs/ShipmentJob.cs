@@ -54,13 +54,13 @@ namespace ZeebePOC.JobManager.Jobs
           var shipmentRequest = JsonConvert.DeserializeObject<ShipmentRequest>(job.Variables);
 
           var jobKey = job.Key;
-          Utils.WriteMessage($"---> Shipping order!!! (JobKey {jobKey})", ConsoleColor.Cyan);
+          Utils.WriteMessage($"---> Shipping order!!! (JobKey {jobKey})", ConsoleColor.Yellow);
 
-          Utils.WriteMessage($"***> Sendig PaymentId {shipmentRequest.PaymentId} to shipping service...", ConsoleColor.Cyan);
+          Utils.WriteMessage($"***> Sendig PaymentId {shipmentRequest.PaymentId} to shipping service...", ConsoleColor.Yellow);
 
           var response = SendToProcess(shipmentRequest).Result;
 
-          Utils.WriteMessage($":::> ShipmentId {response.ShipmentId} created.", ConsoleColor.Cyan);
+          Utils.WriteMessage($":::> ShipmentId {response.ShipmentId} created.", ConsoleColor.Yellow);
 
           jobClient.NewCompleteJobCommand(jobKey)
             .Variables(JsonConvert.SerializeObject(response))

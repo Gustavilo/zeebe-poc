@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Protobuf Include="..\proto\order.proto" GrpcServices="None" Access="Protected" />
+    <Protobuf Include="..\proto\paymentLink.proto" GrpcServices="None" Access="Protected" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.Development.json">
@@ -27,5 +28,8 @@
     <ProjectReference Include="..\Zeebe.Common\Zeebe.Common.csproj">
       <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
 </Project>

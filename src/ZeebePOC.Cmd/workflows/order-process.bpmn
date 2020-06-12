@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1mhlo5c" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.7.0">
   <bpmn:process id="order-process" name="Order Process" isExecutable="true">
-    <bpmn:startEvent id="StartEvent_1" name="Order placed">
+    <bpmn:startEvent id="start-even-op" name="Order placed">
       <bpmn:outgoing>SequenceFlow_08xkokm</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:endEvent id="Event_1vev9an" name="Order delivered">
+    <bpmn:endEvent id="finish-op" name="Order delivered">
       <bpmn:incoming>SequenceFlow_076um0c</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="payment-service-task" name="Collect Money">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="payment-service" retries="3" />
+        <zeebe:taskDefinition type="payment-service-op" retries="3" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_08xkokm</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_00vmsg7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_08xkokm" sourceRef="StartEvent_1" targetRef="payment-service-task" />
+    <bpmn:sequenceFlow id="SequenceFlow_08xkokm" sourceRef="start-even-op" targetRef="payment-service-task" />
     <bpmn:sequenceFlow id="SequenceFlow_00vmsg7" sourceRef="payment-service-task" targetRef="shipment-service-task" />
     <bpmn:serviceTask id="shipment-service-task" name="Ship Product">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="shipment-service" retries="3" />
+        <zeebe:taskDefinition type="shipment-service-op" retries="3" />
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_00vmsg7</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_076um0c</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_076um0c" sourceRef="shipment-service-task" targetRef="Event_1vev9an" />
+    <bpmn:sequenceFlow id="SequenceFlow_076um0c" sourceRef="shipment-service-task" targetRef="finish-op" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="order-process">
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start-even-op">
         <dc:Bounds x="179" y="79" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="165" y="122" width="64" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1vev9an_di" bpmnElement="Event_1vev9an">
+      <bpmndi:BPMNShape id="Event_1vev9an_di" bpmnElement="finish-op">
         <dc:Bounds x="592" y="79" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="572" y="122" width="76" height="14" />

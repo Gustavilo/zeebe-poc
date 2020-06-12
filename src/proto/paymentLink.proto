@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "ZeebePOC.ShipmentLink.Service";
+
+package PaymentLink;
+
+message PaymentLinkRequest {
+  string payment_link_id = 1;
+}
+
+message PaymentLinkResponse {
+  string payment_link_status = 1;
+}
+
+service PaymentLinkService {
+  rpc ProcessPaymentLink (PaymentLinkRequest) returns (PaymentLinkResponse);
+}

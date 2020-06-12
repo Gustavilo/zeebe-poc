@@ -34,13 +34,31 @@ namespace ZeebePOC.JobManager
         var paymentJob = new PaymentJob(zeebeContext.Client);
         var shipmentJob = new ShipmentJob(zeebeContext.Client);
 
-        Task.Factory.StartNew(() => paymentJob.StartWorker("payment-service", Environment.MachineName));
-        Task.Factory.StartNew(() => shipmentJob.StartWorker("shipment-service", Environment.MachineName));
+        var emailJob = new EmailJob(zeebeContext.Client);
+        var databaseCleanerJob = new CleanDataBaseJob(zeebeContext.Client);
+
+        var createPaymentLinkJob = new CreatePaymentLinkJob(zeebeContext.Client);
+        var paymentLinNotificationkJob = new PaymentLinkNotificationJob(zeebeContext.Client);
+
+        Task.Factory.StartNew(() => paymentJob.StartWorker("payment-service-op", Environment.MachineName));
+        Task.Factory.StartNew(() => shipmentJob.StartWorker("shipment-service-op", Environment.MachineName));
+
+        Task.Factory.StartNew(() => emailJob.StartWorker("email-service", Environment.MachineName));
+        Task.Factory.StartNew(() => databaseCleanerJob.StartWorker("cleaner-service", Environment.MachineName));
+
+        Task.Factory.StartNew(() => createPaymentLinkJob.StartWorker("link-service", Environment.MachineName));
+        Task.Factory.StartNew(() => paymentLinNotificationkJob.StartWorker("link-status-service", Environment.MachineName));
 
         Console.ReadLine();
 
         paymentJob.StopCurrentWorker();
         shipmentJob.StopCurrentWorker();
+
+        emailJob.StopCurrentWorker();
+        databaseCleanerJob.StopCurrentWorker();
+
+        createPaymentLinkJob.StopCurrentWorker();
+        paymentLinNotificationkJob.StopCurrentWorker();
       }
       catch (Exception ex)
       {
