@@ -1,4 +1,6 @@
 ﻿using System;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Zeebe.Client;
 using Zeebe.Client.Api.Worker;
 using Zeebe.Common;
@@ -52,7 +54,15 @@ namespace ZeebePOC.JobManager.Jobs
           var jobKey = job.Key;
           Utils.WriteMessage($"---> PaymnetLink Notification Sent!!! (JobKey {jobKey})", ConsoleColor.DarkGreen);
 
+          dynamic response = JObject.Parse(job.Variables);
+
+          var status = new
+          {
+            Status = response.Status ?? "NOTIFICATION"
+          };
+
           jobClient.NewCompleteJobCommand(jobKey)
+            .Variables(JsonConvert.SerializeObject(status))
             .Send()
             .GetAwaiter()
             .GetResult();
