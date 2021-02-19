@@ -58,13 +58,13 @@ namespace ZeebePOC.JobManager.Jobs
           var orderRequest = JsonConvert.DeserializeObject<OrderRequest>(job.Variables);
 
           var jobKey = job.Key;
-          Utils.WriteMessage($"---> Collect the money!!! (JobKey {jobKey})", ConsoleColor.Green);
+          Utils.WriteMessage($"---> Collect the money!!! (JobKey {jobKey})", ConsoleColor.Magenta);
 
-          Utils.WriteMessage($"***> Sendig OrderId {orderRequest.OrderId} to payment service...", ConsoleColor.Green);
+          Utils.WriteMessage($"***> Sendig OrderId {orderRequest.OrderId} to payment service...", ConsoleColor.Magenta);
 
           var response = SendToProcess(new PaymentRequest { OrderId = orderRequest.OrderId }).Result;
 
-          Utils.WriteMessage($":::> PaymentId {response.PaymentId} created.", ConsoleColor.Green);
+          Utils.WriteMessage($":::> PaymentId {response.PaymentId} created.", ConsoleColor.Magenta);
 
           jobClient.NewCompleteJobCommand(jobKey)
             .Variables(JsonConvert.SerializeObject(response))
@@ -76,7 +76,7 @@ namespace ZeebePOC.JobManager.Jobs
         .MaxJobsActive(5)
         .Name(workerName)
         .AutoCompletion()
-        .PollInterval(TimeSpan.FromSeconds(1))
+        .PollInterval(TimeSpan.FromMilliseconds(250))
         .Timeout(TimeSpan.FromSeconds(10))
         .Open();
 

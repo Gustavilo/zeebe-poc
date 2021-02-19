@@ -12,6 +12,7 @@ message OrderRequest {
 
 message OrderResponse {
   int32 status_id = 1;
+  string shipment_id = 2;
 }
 
 service OrderService {

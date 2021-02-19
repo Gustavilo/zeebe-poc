@@ -53,9 +53,10 @@ namespace ZeebePOC.Payment.Service
         {
           webBuilder.ConfigureKestrel(options =>
           {
-            // Setup a HTTP/2 endpoint without TLS.
-            options.ListenLocalhost(6060, o => o.Protocols =
-                HttpProtocols.Http2);
+            options.ListenLocalhost(6060, o =>
+            {
+              o.Protocols = HttpProtocols.Http2;
+            });
           });
 
           webBuilder

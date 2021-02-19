@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_04makyw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.7.0">
+  <bpmn:process id="timer_procees_mail" name="Timer Process Mail" isExecutable="true">
+    <bpmn:serviceTask id="email-service-task" name="Verify Emails and Send">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="email-service" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1vwon5f</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0u7dqu3</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1qm38va</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1vwon5f" sourceRef="start-event-email" targetRef="email-service-task" />
+    <bpmn:endEvent id="EndEvent_1awxdee" name="Finish">
+      <bpmn:incoming>SequenceFlow_0u7dqu3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0u7dqu3" sourceRef="email-service-task" targetRef="EndEvent_1awxdee" />
+    <bpmn:serviceTask id="ServiceTask_10wbrbs" name="Clean My Database">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="cleaner-service" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_10z7fk8</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:startEvent id="start-event-email" name="Every 2 minutes">
+      <bpmn:outgoing>SequenceFlow_1vwon5f</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT120S</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1qm38va" sourceRef="email-service-task" targetRef="timer-cleaner" />
+    <bpmn:intermediateCatchEvent id="timer-cleaner" name="1 min.">
+      <bpmn:incoming>SequenceFlow_1qm38va</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_10z7fk8</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT60S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_10z7fk8" sourceRef="timer-cleaner" targetRef="ServiceTask_10wbrbs" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="timer_procees_mail">
+      <bpmndi:BPMNShape id="ServiceTask_0e2cxp5_di" bpmnElement="email-service-task">
+        <dc:Bounds x="310" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vwon5f_di" bpmnElement="SequenceFlow_1vwon5f">
+        <di:waypoint x="215" y="117" />
+        <di:waypoint x="310" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1awxdee_di" bpmnElement="EndEvent_1awxdee">
+        <dc:Bounds x="512" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="516" y="142" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0u7dqu3_di" bpmnElement="SequenceFlow_0u7dqu3">
+        <di:waypoint x="410" y="117" />
+        <di:waypoint x="512" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_10wbrbs_di" bpmnElement="ServiceTask_10wbrbs">
+        <dc:Bounds x="650" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_05kky2v_di" bpmnElement="start-event-email">
+        <dc:Bounds x="179" y="99" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="159" y="142" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1qm38va_di" bpmnElement="SequenceFlow_1qm38va">
+        <di:waypoint x="410" y="117" />
+        <di:waypoint x="460" y="117" />
+        <di:waypoint x="460" y="230" />
+        <di:waypoint x="512" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0869aa9_di" bpmnElement="timer-cleaner">
+        <dc:Bounds x="512" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="515" y="255" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_10z7fk8_di" bpmnElement="SequenceFlow_10z7fk8">
+        <di:waypoint x="548" y="230" />
+        <di:waypoint x="650" y="230" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

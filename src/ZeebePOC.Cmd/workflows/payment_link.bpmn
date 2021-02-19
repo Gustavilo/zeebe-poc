@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1l0f3tr" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.7.0">
+  <bpmn:process id="payment-link-process" name="Payment Link Process" isExecutable="true">
+    <bpmn:startEvent id="start_plink" name="Begin Process">
+      <bpmn:outgoing>SequenceFlow_1j26dzv</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="link-service-task" name="Create Payment Link">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="link-service" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1j26dzv</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_02rvz3n</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1q9ij1a</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1j26dzv" sourceRef="start_plink" targetRef="link-service-task" />
+    <bpmn:intermediateCatchEvent id="timer_created" name="Wait until finish time is near (1 min.)">
+      <bpmn:incoming>SequenceFlow_02rvz3n</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1sp22ui</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT60S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_02rvz3n" sourceRef="link-service-task" targetRef="timer_created" />
+    <bpmn:serviceTask id="link-status-service-task" name="Verify Payment Link Status and Send Notification">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="link-status-service" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1sp22ui</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0zzgo8a</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1sp22ui" sourceRef="timer_created" targetRef="link-status-service-task" />
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0pmzkuk">
+      <bpmn:incoming>SequenceFlow_0s3r4ng</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0gnvw2x</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0uayf4y</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent_1w26jr1" name="End Process">
+      <bpmn:incoming>SequenceFlow_0gnvw2x</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0gnvw2x" name="Is Payed or Cancelled?" sourceRef="ExclusiveGateway_0pmzkuk" targetRef="EndEvent_1w26jr1">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= Status = "PAYED" or Status = "CANCELED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0s3r4ng" sourceRef="IntermediateCatchEvent_0mgqtf0" targetRef="ExclusiveGateway_0pmzkuk" />
+    <bpmn:intermediateCatchEvent id="timer_updated" name="Wait until finish time is near (1 min.)">
+      <bpmn:incoming>SequenceFlow_0uayf4y</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0zzgo8a</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1aqz1ua</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT60S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0uayf4y" name="Is Updated?" sourceRef="ExclusiveGateway_0pmzkuk" targetRef="timer_updated">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">= Status = "UPDATED"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0zzgo8a" sourceRef="timer_updated" targetRef="link-status-service-task" />
+    <bpmn:sequenceFlow id="SequenceFlow_1q9ij1a" sourceRef="link-service-task" targetRef="IntermediateCatchEvent_0mgqtf0" />
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_0mgqtf0" name="Change Payment Link Status&#10;&#10;">
+      <bpmn:incoming>SequenceFlow_1q9ij1a</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1aqz1ua</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0s3r4ng</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_1b36ugr" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1aqz1ua" name="Wait again for external response" sourceRef="timer_updated" targetRef="IntermediateCatchEvent_0mgqtf0" />
+  </bpmn:process>
+  <bpmn:message id="Message_1b36ugr" name="payment-link-status-changed">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="= PaymentLinkId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="payment-link-process">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start_plink">
+        <dc:Bounds x="179" y="279" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="162" y="322" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0u7utzq_di" bpmnElement="link-service-task">
+        <dc:Bounds x="270" y="257" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1j26dzv_di" bpmnElement="SequenceFlow_1j26dzv">
+        <di:waypoint x="215" y="297" />
+        <di:waypoint x="270" y="297" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1j5q8ky_di" bpmnElement="timer_created">
+        <dc:Bounds x="302" y="392" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="213" y="400" width="74" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_02rvz3n_di" bpmnElement="SequenceFlow_02rvz3n">
+        <di:waypoint x="320" y="337" />
+        <di:waypoint x="320" y="392" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0dqzget_di" bpmnElement="link-status-service-task">
+        <dc:Bounds x="270" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1sp22ui_di" bpmnElement="SequenceFlow_1sp22ui">
+        <di:waypoint x="320" y="428" />
+        <di:waypoint x="320" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0pmzkuk_di" bpmnElement="ExclusiveGateway_0pmzkuk" isMarkerVisible="true">
+        <dc:Bounds x="595" y="265" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1w26jr1_di" bpmnElement="EndEvent_1w26jr1">
+        <dc:Bounds x="792" y="272" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="848" y="283" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0gnvw2x_di" bpmnElement="SequenceFlow_0gnvw2x">
+        <di:waypoint x="645" y="290" />
+        <di:waypoint x="792" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="698" y="256" width="56" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0s3r4ng_di" bpmnElement="SequenceFlow_0s3r4ng">
+        <di:waypoint x="538" y="160" />
+        <di:waypoint x="620" y="160" />
+        <di:waypoint x="620" y="265" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1e3736x_di" bpmnElement="timer_updated">
+        <dc:Bounds x="492" y="492" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="473" y="535" width="74" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0uayf4y_di" bpmnElement="SequenceFlow_0uayf4y">
+        <di:waypoint x="595" y="290" />
+        <di:waypoint x="510" y="290" />
+        <di:waypoint x="510" y="490" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="520" y="393" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0zzgo8a_di" bpmnElement="SequenceFlow_0zzgo8a">
+        <di:waypoint x="492" y="510" />
+        <di:waypoint x="370" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1q9ij1a_di" bpmnElement="SequenceFlow_1q9ij1a">
+        <di:waypoint x="320" y="257" />
+        <di:waypoint x="320" y="160" />
+        <di:waypoint x="502" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_06zuj8p_di" bpmnElement="IntermediateCatchEvent_0mgqtf0">
+        <dc:Bounds x="502" y="142" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="477" y="102.5" width="85" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1aqz1ua_di" bpmnElement="SequenceFlow_1aqz1ua">
+        <di:waypoint x="498" y="497" />
+        <di:waypoint x="410" y="400" />
+        <di:waypoint x="470" y="210" />
+        <di:waypoint x="507" y="173" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="366" y="216" width="88" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Zeebe.Client;
 
@@ -25,11 +27,18 @@ namespace Zeebe.Common
     /// 
     /// </summary>
     /// <param name="zeebeUrl"></param>
-    public ZeebeContext(string zeebeUrl) =>
+    public ZeebeContext(string zeebeUrl)
+    {
+      //var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+      //Console.WriteLine(path);
+
       Client = ZeebeClient.Builder()
       .UseGatewayAddress(zeebeUrl)
       .UsePlainText()
+      //.UseTransportEncryption($"{path}/admin.pem")
       .Build();
+    }
 
     #endregion
 
@@ -58,7 +67,7 @@ namespace Zeebe.Common
         .AddResourceFile(path)
         .Send();
 
-      Utils.WriteMessage($"Workflow added version-{response.Workflows.FirstOrDefault().Version}",
+      Utils.WriteMessage($"Workflow {path} added version - {response.Workflows.FirstOrDefault().Version}",
         ConsoleColor.Yellow);
     }
 

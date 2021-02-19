@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Zeebe.Common;
-using ZeebePOC.Order.Service;
 
 namespace ZeebePOC.Cmd
 {
@@ -39,47 +37,26 @@ namespace ZeebePOC.Cmd
       {
         _zeebeContext = new ZeebeContext(_zeebeUrl);
 
-        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process.bpmn");
+        var pathOrderProcess = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process.bpmn");
+
+        var pathOrderPaymentLinkProcess = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "payment_link.bpmn");
+
+        //var pathOrderProcessSalesForce = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "order-process-salesforce.bpmn");
+
+        //var pathTimerEmail = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "workflows", "timer-email.bpmn");
 
         await _zeebeContext.GetTopology();
 
-        await _zeebeContext.DeployProcess(path);
-
-        await CreateInstance("order-process", new OrderRequest
-        {
-          OrderId = Guid.NewGuid().ToString(),
-          Amount = 23,
-          TotalItems = 2
-        });
-
+        await _zeebeContext.DeployProcess(pathOrderProcess);
+        await _zeebeContext.DeployProcess(pathOrderPaymentLinkProcess);
+        //await _zeebeContext.DeployProcess(pathOrderProcessSalesForce);
+        //await _zeebeContext.DeployProcess(pathTimerEmail);
       }
       catch (Exception ex)
       {
         Utils.WriteMessage(ex.Message, ConsoleColor.Red);
+        Utils.WriteMessage(ex.StackTrace, ConsoleColor.Red);
       }
-    }
-
-    #endregion
-
-    #region :: Private Methods ::
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="processId"></param>
-    /// <param name="orderRequest"></param>
-    /// <returns></returns>
-    private static async Task CreateInstance(string processId, OrderRequest orderRequest)
-    {
-      var workflowInstance = await _zeebeContext.Client
-        .NewCreateWorkflowInstanceCommand()
-        .BpmnProcessId(processId)
-        .LatestVersion()
-        .Variables(JsonConvert.SerializeObject(orderRequest))
-        .Send();
-
-
-      Utils.WriteMessage(workflowInstance.WorkflowInstanceKey.ToString(), ConsoleColor.Green);
     }
 
     #endregion
